@@ -26,7 +26,7 @@ PXBItoCollada.exe <folder>
 
 ## Known Issues
 - Uncompressed textures do not export well. The tool also exports the raw GTF files, such that alternative GTF conversion tools can be used to convert these files.
-- Some textures have bad alpha-channel data that must be manually fixes in an external program.
+- Some textures have bad alpha-channel data that must be manually fixed in an external program.
 - The skeletons _may_ not be exactly correct.
 - Materials do not export with any information other than textures; information such as specular coefficients have not been pinpointed within the material data structures in the files and are therefore not extracted.
 - Vertex tangents and binormals may be the wrong way around, needs confirmation.
