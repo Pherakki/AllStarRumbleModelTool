@@ -106,7 +106,7 @@ class ColladaFloatSource:
         writefunc(indent + f"""<source id="{self.sid}">""")
         writefunc(indent + f"""  <float_array id="{self.sid}-array" count="{len(flat_contents)}">{" ".join([str(float(item)) for item in flat_contents])}</float_array>""")
         writefunc(indent + f"""  <technique_common>""")
-        writefunc(indent + f"""    <accessor source="#{self.sid}-array" count="{self.contents.shape[0]}" stride="{self.contents.shape[1]}">""")
+        writefunc(indent + f"""    <accessor source="#{self.sid}-array" count="{len(self.contents)}" stride="{len(self.contents[0])}">""")
         for param_name in self.param_names:
             writefunc(indent + f"""      <param name="{param_name}" type="float"/>""")
         writefunc(indent + f"""    </accessor>""")          

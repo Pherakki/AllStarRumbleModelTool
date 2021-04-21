@@ -2,11 +2,25 @@ import os
 import struct 
 import sys
 
-import numpy as np
-
 from ManualCollada import *
 from PXBIInterface import PXBIInterface    
 
+"""
+Borrowed from https://github.com/ThomIves/MatrixInverse,
+following from this answer https://stackoverflow.com/a/62940942
+"""
+def invert_matrix(AM, IM):
+    for fd in range(len(AM)):
+        fdScaler = 1.0 / AM[fd][fd]
+        for j in range(len(AM)):
+            AM[fd][j] *= fdScaler
+            IM[fd][j] *= fdScaler
+        for i in list(range(len(AM)))[0:fd] + list(range(len(AM)))[fd+1:]:
+            crScaler = AM[i][fd]
+            for j in range(len(AM)):
+                AM[i][j] = AM[i][j] - crScaler * AM[fd][j]
+                IM[i][j] = IM[i][j] - crScaler * IM[fd][j]
+    return IM
 
 def flatten_list(lst):
     return [subitem for item in lst for subitem in item]
@@ -77,7 +91,10 @@ def PXBItoCollada(file, output_directory):
         #materials.append(matnode)
     
     pi.bone_data[0][0] = "root"
-    armature = ColladaArmatureNode("armature", np.eye(4))
+    armature = ColladaArmatureNode("armature", [[1., 0., 0., 0.],
+                                                [0., 1., 0., 0.],
+                                                [0., 0., 1., 0.],
+                                                [0., 0., 0., 1.]])
     bone_to_joint = {bone_idx: bone_data[1] for bone_idx, bone_data in enumerate(pi.bone_data)}
     joint_to_bone = {bone_data[1]: bone_idx for bone_idx, bone_data in enumerate(pi.bone_data)}
     bone_parents = {bone_idx: joint_to_bone.get(pi.joint_data[idx][3], -1) for bone_idx, idx in bone_to_joint.items()}
@@ -90,7 +107,11 @@ def PXBItoCollada(file, output_directory):
     
     bonenodes = []
     for name, joint, transform in pi.bone_data:
-        bone_node = ColladaBoneNode(name, armature, np.linalg.inv(np.array(transform)))
+        bone_node = ColladaBoneNode(name, armature, invert_matrix([list(item) for item in transform], 
+                                                                  [[1., 0., 0., 0.],
+                                                                   [0., 1., 0., 0.],
+                                                                   [0., 0., 1., 0.],
+                                                                   [0., 0., 0., 1.]]))
         bonenodes.append(bone_node)
     
     for idx, children in parents.items():
@@ -106,11 +127,11 @@ def PXBItoCollada(file, output_directory):
     
     geom_nodes = []
     for i, mesh in enumerate(pi.meshes):
-        vert_src = ColladaFloatSource(f"{mesh.name}-{i}-Position", np.array(([vert['Position'] for vert in mesh.vertices])), ('X', 'Y', 'Z'))
-        normal_src = ColladaFloatSource(f"{mesh.name}-{i}-Normal", np.array(([vert['Normal'] for vert in mesh.vertices])), ('X', 'Y', 'Z'))
-        uv_src = ColladaFloatSource(f"{mesh.name}-{i}-UV", np.array(([vert['UV'] for vert in mesh.vertices])), ('S', 'T'))
-        tangent_src = ColladaFloatSource(f"{mesh.name}-{i}-Tangent", np.array(([vert['Tangent'] for vert in mesh.vertices])), ('X', 'Y', 'Z'))
-        binormal_src = ColladaFloatSource(f"{mesh.name}-{i}-Binormal", np.array(([vert['Binormal'] for vert in mesh.vertices])), ('X', 'Y', 'Z'))
+        vert_src = ColladaFloatSource(f"{mesh.name}-{i}-Position", [vert['Position'] for vert in mesh.vertices], ('X', 'Y', 'Z'))
+        normal_src = ColladaFloatSource(f"{mesh.name}-{i}-Normal", [vert['Normal'] for vert in mesh.vertices], ('X', 'Y', 'Z'))
+        uv_src = ColladaFloatSource(f"{mesh.name}-{i}-UV", [vert['UV'] for vert in mesh.vertices], ('S', 'T'))
+        tangent_src = ColladaFloatSource(f"{mesh.name}-{i}-Tangent", [vert['Tangent'] for vert in mesh.vertices], ('X', 'Y', 'Z'))
+        binormal_src = ColladaFloatSource(f"{mesh.name}-{i}-Binormal", [vert['Binormal'] for vert in mesh.vertices], ('X', 'Y', 'Z'))
         
         input_list = ColladaInputList()
         input_list.add_input(0, 'VERTEX', vert_src)
@@ -120,7 +141,7 @@ def PXBItoCollada(file, output_directory):
         input_list.add_input(4, 'BINORMAL', binormal_src)
         
         mat = materials[mesh.material_index]
-        indices = np.array(flatten_list([(item, item, item, item, item) for item in flatten_list(mesh.triangles)]))
+        indices = flatten_list([(item, item, item, item, item) for item in flatten_list(mesh.triangles)])
         triangle_set = ColladaTriangleSet(indices, input_list, mat)
         
         geom = ColladaGeometry(f"{mesh.name}-{i}" + "-ID", f"{mesh.name}-{i}" + "-mesh", [vert_src, normal_src, uv_src, tangent_src, binormal_src], triangle_set)
@@ -128,7 +149,7 @@ def PXBItoCollada(file, output_directory):
         
         
         skin_controller = ColladaSkinController("armature", geom, [bone[0] for bone in pi.bone_data],
-                                                [np.array(bone[-1]) for bone in pi.bone_data],
+                                                [bone[-1] for bone in pi.bone_data],
                                                 [v['Weights'] for v in mesh.vertices],
                                                 [v['BoneIndices'] for v in mesh.vertices])
         
