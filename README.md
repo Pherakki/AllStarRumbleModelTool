@@ -6,7 +6,6 @@ This program is unlikely to be actively worked on, but pull requests that add us
 
 ## Dependencies
 - Python >= 3.6
-- NumPy
 
 ## Usage
 The tool can be passed either a `.bin` file or a folder containing `.bin` files. In the first instance, the model will be extracted to a folder with the same name as the input `.bin` file. If it is given a folder, each file will be extracted to a folder with the same name as the input `.bin` file inside a folder "out".
@@ -27,7 +26,7 @@ PXBItoCollada.exe <folder>
 
 ## Known Issues
 - Uncompressed textures do not export well. The tool also exports the raw GTF files, such that alternative GTF conversion tools can be used to convert these files.
-- Some textures have bad alpha-channel data that must be manually fixes in an external program.
+- Some textures have bad alpha-channel data that must be manually fixed in an external program.
 - The skeletons _may_ not be exactly correct.
 - Materials do not export with any information other than textures; information such as specular coefficients have not been pinpointed within the material data structures in the files and are therefore not extracted.
 - Vertex tangents and binormals may be the wrong way around, needs confirmation.
@@ -38,3 +37,5 @@ Thanks to [WarGrey-Sama](https://www.deviantart.com/wargrey-sama) for requesting
 Thanks to [SydMontague](https://github.com/SydMontague) for help fixing vertex weight issues in the COLLADA exporter!
 
 Releases are compiled with [PyInstaller 4.3 for Python 3.9.4](https://www.pyinstaller.org/).
+
+Utilises code from [this repository for matrix inverses](https://github.com/ThomIves/MatrixInverse) to remove the NumPy dependency.
