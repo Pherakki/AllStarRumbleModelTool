@@ -189,16 +189,17 @@ class PXBIReadWriter(BaseRW):
         Should be the inverse of 'reinterpret_data', which should be called before writing the file.
         """
         bone_matrix_data = []
-        for chunk in chunks(self.bone_data, 18):
-            ptr_1 = chunk[0]
-            if ptr_1 != 0:
-                name_1 = read_string_inplace(self.bytestream, ptr_1 + self.offset)
-            else:
-                name_1 = ''
-            idx = chunk[1]  # Parent idx?
-
-            matrix = [chunk[2:6], chunk[6:10], chunk[10:14], chunk[14:18]]
-            bone_matrix_data.append([name_1, idx, matrix])
+        if len(self.bone_data):
+            for chunk in chunks(self.bone_data, 18):
+                ptr_1 = chunk[0]
+                if ptr_1 != 0:
+                    name_1 = read_string_inplace(self.bytestream, ptr_1 + self.offset)
+                else:
+                    name_1 = ''
+                idx = chunk[1]  # Parent idx?
+    
+                matrix = [chunk[2:6], chunk[6:10], chunk[10:14], chunk[14:18]]
+                bone_matrix_data.append([name_1, idx, matrix])
         self.bone_data = bone_matrix_data
         self.joint_data = list(chunks(self.joint_data, 21))
         self.joint_names = [read_string_inplace(self.bytestream, data[10]+self.offset) for data in self.joint_data]
