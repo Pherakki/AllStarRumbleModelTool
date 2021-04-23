@@ -243,8 +243,10 @@ class MeshReadWrite(BaseRW):
         rw_operator("triangles", self.triangle_count*'H', endianness='>')
         
     def interpret_data(self):
-        self.name = read_string_inplace(self.bytestream, self.name_pointer + self.offset)
-        assert self.bytes_per_vertex == 88, "Bytes per vertex not 88."
+        self.name = read_string_inplace(self.bytestream, self.name_pointer + self.offset)     
+        first_vertex = self.vertex_data[:self.bytes_per_vertex//4]
+        
+        assert self.bytes_per_vertex in [56, 72, 80, 88, 104], f"Unregonised vertex format: {self.bytes_per_vertex} bytes per vertex."
         interpreted_vertex_data = []
         for chunk in chunks(self.vertex_data, 22):
             vertex = {}
