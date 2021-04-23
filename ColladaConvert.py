@@ -162,16 +162,18 @@ def PXBItoCollada(file, output_directory):
         geom = ColladaGeometry(f"{mesh.name}-{i}" + "-ID", f"{mesh.name}-{i}" + "-mesh", sources, triangle_set)
         model.geometries.append(geom)
         
+        if 'Weights' in mesh.vertices[0] and 'BoneIndices' in mesh.vertices[0]:
+            skin_controller = ColladaSkinController("armature", geom, [bone[0] for bone in pi.bone_data],
+                                                    [bone[-1] for bone in pi.bone_data],
+                                                    [v['Weights'] for v in mesh.vertices],
+                                                    [v['BoneIndices'] for v in mesh.vertices])
+            
+            model.controllers.append(skin_controller)
         
-        skin_controller = ColladaSkinController("armature", geom, [bone[0] for bone in pi.bone_data],
-                                                [bone[-1] for bone in pi.bone_data],
-                                                [v['Weights'] for v in mesh.vertices],
-                                                [v['BoneIndices'] for v in mesh.vertices])
+            geom_nodes.append(ColladaSkinnedGeometryNode(mesh.name, mesh.name, geom, mat, armature, skin_controller))
+        else:
+            geom_nodes.append(ColladaUnskinnedGeometryNode(mesh.name, mesh.name, geom, mat, armature))
         
-        model.controllers.append(skin_controller)
-        
-        
-        geom_nodes.append(ColladaGeometryNode(mesh.name, mesh.name, geom, mat, armature, skin_controller))
         
     
         
