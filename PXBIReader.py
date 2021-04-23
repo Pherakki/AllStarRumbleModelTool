@@ -248,16 +248,57 @@ class MeshReadWrite(BaseRW):
         
         assert self.bytes_per_vertex in [56, 72, 80, 88, 104], f"Unregonised vertex format: {self.bytes_per_vertex} bytes per vertex."
         interpreted_vertex_data = []
-        for chunk in chunks(self.vertex_data, 22):
-            vertex = {}
-            vertex['Position'] = chunk[0:3]
-            vertex['Normal'] = chunk[3:6]
-            vertex['UV'] = chunk[6:8]
-            vertex['Tangent'] = chunk[8:11]
-            vertex['Binormal'] = chunk[11:14]
-            vertex['Weights'] = chunk[14:18]
-            vertex['BoneIndices'] = chunk[18:22]
-            interpreted_vertex_data.append(vertex)
+        
+        
+        if self.bytes_per_vertex == 56:
+            for chunk in chunks(self.vertex_data, self.bytes_per_vertex//4):
+                vertex = {}
+                vertex['Position'] = chunk[0:3]
+                vertex['Normal'] = chunk[3:6]
+                vertex['UV'] = chunk[12:14]
+                interpreted_vertex_data.append(vertex)
+                
+        if self.bytes_per_vertex == 72:
+            for chunk in chunks(self.vertex_data, self.bytes_per_vertex//4):
+                vertex = {}
+                vertex['Position'] = chunk[0:3]
+                vertex['Normal'] = chunk[3:6]
+                interpreted_vertex_data.append(vertex)
+                
+        elif self.bytes_per_vertex == 80:
+            for chunk in chunks(self.vertex_data, self.bytes_per_vertex//4):
+                vertex = {}
+                vertex['Position'] = chunk[0:3]
+                vertex['Normal'] = chunk[3:6]
+                vertex['UV'] = chunk[18:20]
+                #vertex['Tangent'] = chunk[8:11]
+                #vertex['Binormal'] = chunk[11:14]
+                #vertex['Weights'] = chunk[14:18]
+                #vertex['BoneIndices'] = chunk[18:22]
+                interpreted_vertex_data.append(vertex)
+        elif self.bytes_per_vertex == 88:
+            for chunk in chunks(self.vertex_data, self.bytes_per_vertex//4):
+                vertex = {}
+                vertex['Position'] = chunk[0:3]
+                vertex['Normal'] = chunk[3:6]
+                vertex['UV'] = chunk[6:8]
+                vertex['Tangent'] = chunk[8:11]
+                vertex['Binormal'] = chunk[11:14]
+                vertex['Weights'] = chunk[14:18]
+                vertex['BoneIndices'] = chunk[18:22]
+                interpreted_vertex_data.append(vertex)
+        elif self.bytes_per_vertex == 104:
+            for chunk in chunks(self.vertex_data, self.bytes_per_vertex//4):
+                vertex = {}
+                vertex['Position'] = chunk[0:3]
+                vertex['Normal'] = chunk[3:6]
+                vertex['UV'] = chunk[6:8]
+                vertex['Tangent'] = chunk[8:11]
+                vertex['Binormal'] = chunk[11:14]
+                vertex['Weights'] = chunk[14:18]
+                vertex['BoneIndices'] = chunk[18:22]
+                vertex['Color'] = chunk[22:26]
+                interpreted_vertex_data.append(vertex)
         self.vertex_data = interpreted_vertex_data
         self.triangles = list(chunks(self.triangles, 3))
         
