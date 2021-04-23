@@ -126,8 +126,9 @@ class PXBIReadWriter(BaseRW):
         rw_operator("joint_count", 'I', endianness='>')
         
     def rw_bone_matrices(self, rw_operator):
-        self.assert_file_pointer_now_at(self.bone_matrices_pointer + self.offset - 4)
-        rw_operator("bone_data", "IIffffffffffffffff"*self.bone_count, endianness='>')
+        if self.bone_matrices_pointer != 0:
+            self.assert_file_pointer_now_at(self.bone_matrices_pointer + self.offset - 4)
+            rw_operator("bone_data", "IIffffffffffffffff"*self.bone_count, endianness='>')
         
     def rw_joints(self, rw_operator):
         rw_operator("joint_list_name", "I", endianness='>')
