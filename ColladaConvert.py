@@ -90,37 +90,39 @@ def PXBItoCollada(file, output_directory):
         #matnode = scene.MaterialNode(f"{as_material.name}", mat, inputs=[])
         #materials.append(matnode)
     
-    pi.bone_data[0][0] = "root"
-    armature = ColladaArmatureNode("armature", [[1., 0., 0., 0.],
-                                                [0., 1., 0., 0.],
-                                                [0., 0., 1., 0.],
-                                                [0., 0., 0., 1.]])
-    bone_to_joint = {bone_idx: bone_data[1] for bone_idx, bone_data in enumerate(pi.bone_data)}
-    joint_to_bone = {bone_data[1]: bone_idx for bone_idx, bone_data in enumerate(pi.bone_data)}
-    bone_parents = {bone_idx: joint_to_bone.get(pi.joint_data[idx][3], -1) for bone_idx, idx in bone_to_joint.items()}
-    n_accounted = 0
-    
-    parents = {i: [] for i in range(-1, len(bone_parents))}
-    for child, parent in bone_parents.items():
-        parents[parent].append(child)
-    
-    
-    bonenodes = []
-    for name, joint, transform in pi.bone_data:
-        bone_node = ColladaBoneNode(name, armature, invert_matrix([list(item) for item in transform], 
-                                                                  [[1., 0., 0., 0.],
-                                                                   [0., 1., 0., 0.],
-                                                                   [0., 0., 1., 0.],
-                                                                   [0., 0., 0., 1.]]))
-        bonenodes.append(bone_node)
-    
-    for idx, children in parents.items():
-        if idx == -1:
-            continue
-        for child in children:
-            bonenodes[idx].child_nodes.append(bonenodes[child])
-    
-    armature.child_nodes.extend([bonenodes[i] for i in parents[-1]])
+    armature = None
+    if len(pi.bone_data):
+        pi.bone_data[0][0] = "root"
+        armature = ColladaArmatureNode("armature", [[1., 0., 0., 0.],
+                                                    [0., 1., 0., 0.],
+                                                    [0., 0., 1., 0.],
+                                                    [0., 0., 0., 1.]])
+        bone_to_joint = {bone_idx: bone_data[1] for bone_idx, bone_data in enumerate(pi.bone_data)}
+        joint_to_bone = {bone_data[1]: bone_idx for bone_idx, bone_data in enumerate(pi.bone_data)}
+        bone_parents = {bone_idx: joint_to_bone.get(pi.joint_data[idx][3], -1) for bone_idx, idx in bone_to_joint.items()}
+        n_accounted = 0
+        
+        parents = {i: [] for i in range(-1, len(bone_parents))}
+        for child, parent in bone_parents.items():
+            parents[parent].append(child)
+        
+        
+        bonenodes = []
+        for name, joint, transform in pi.bone_data:
+            bone_node = ColladaBoneNode(name, armature, invert_matrix([list(item) for item in transform], 
+                                                                      [[1., 0., 0., 0.],
+                                                                       [0., 1., 0., 0.],
+                                                                       [0., 0., 1., 0.],
+                                                                       [0., 0., 0., 1.]]))
+            bonenodes.append(bone_node)
+        
+        for idx, children in parents.items():
+            if idx == -1:
+                continue
+            for child in children:
+                bonenodes[idx].child_nodes.append(bonenodes[child])
+        
+        armature.child_nodes.extend([bonenodes[i] for i in parents[-1]])
     
         
     
@@ -172,7 +174,7 @@ def PXBItoCollada(file, output_directory):
         
             geom_nodes.append(ColladaSkinnedGeometryNode(mesh.name, mesh.name, geom, mat, armature, skin_controller))
         else:
-            geom_nodes.append(ColladaUnskinnedGeometryNode(mesh.name, mesh.name, geom, mat, armature))
+            geom_nodes.append(ColladaUnskinnedGeometryNode(mesh.name, mesh.name, geom, mat))
         
         
     
@@ -180,8 +182,11 @@ def PXBItoCollada(file, output_directory):
     
     
     scene = ColladaSceneNode("Scene", "Scene")
-    armature.child_nodes.extend(geom_nodes)
-    scene.child_nodes.append(armature)
+    if armature is None:
+        scene.child_nodes.extend(geom_nodes)
+    else:
+        armature.child_nodes.extend(geom_nodes)
+        scene.child_nodes.append(armature)
     model.scenes.append(scene)
     
     base_filename = os.path.splitext(os.path.split(file)[-1])[0]
