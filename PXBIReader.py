@@ -137,10 +137,13 @@ class PXBIReadWriter(BaseRW):
         
     def rw_texture_pointers(self, rw_operator):
         self.assert_file_pointer_now_at(self.padding_pointer + self.offset)
-        rw_operator("padding_1", "I", endianness='>')
-        rw_operator("padding_2", "I", endianness='>')
-        self.assert_is_zero("padding_1")
-        self.assert_is_zero("padding_2")
+        rw_operator("unknown_0x00", "I", endianness='>')  # 0 or 1?
+        rw_operator("unknown_texture_pointer", "I", endianness='>')  # 16306496
+        if self.unknown_texture_pointer != 0:
+            self.assert_file_pointer_now_at(self.unknown_texture_pointer + self.offset)
+            print(self.bytestream.read(64))
+
+
         self.assert_file_pointer_now_at(self.texture_pointers_pointer + self.offset)
         rw_operator("texture_pointers", "I"*self.texture_count, endianness='>')  # Points to the texture pointer info
         rw_operator("texture_pointer_info", "IIII"*self.texture_count, endianness='>') # File number, filepath, size, offset
