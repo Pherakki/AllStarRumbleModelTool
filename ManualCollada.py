@@ -283,7 +283,7 @@ class ColladaSceneNode:
 class ColladaMaterialNode:
     pass
 
-class ColladaGeometryNode:
+class ColladaSkinnedGeometryNode:
     def __init__(self, sid, name, geometry, material, armature_node, skin):
         self.sid = sid
         self.name = name
@@ -295,7 +295,6 @@ class ColladaGeometryNode:
     def write(self, writefunc, indent):
         writefunc(indent + f"""<node id="{self.sid}" name="{self.name}" type="NODE">""")
         writefunc(indent + f"""  <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>""")
-        # Will be replaced by skinning node
         writefunc(indent + f"""  <instance_controller url="#{self.skin.sid}">""")
         writefunc(indent + f"""    <skeleton>#{self.armature.name}</skeleton>""")
         writefunc(indent + f"""    <bind_material>""")
@@ -306,6 +305,29 @@ class ColladaGeometryNode:
         writefunc(indent + f"""      </technique_common>""")
         writefunc(indent + f"""    </bind_material>""")
         writefunc(indent + f"""  </instance_controller>""")
+        writefunc(indent + f"""</node>""")
+        
+        
+class ColladaUnskinnedGeometryNode:
+    def __init__(self, sid, name, geometry, material, armature_node):
+        self.sid = sid
+        self.name = name
+        self.geometry = geometry
+        self.material = material
+        self.armature = armature_node
+    
+    def write(self, writefunc, indent):
+        writefunc(indent + f"""<node id="{self.sid}" name="{self.name}" type="NODE">""")
+        writefunc(indent + f"""  <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>""")
+        writefunc(indent + f"""  <instance_geometry url="#{self.geometry.sid}">""")
+        writefunc(indent + f"""    <bind_material>""")
+        writefunc(indent + f"""      <technique_common>""")
+        writefunc(indent + f"""        <instance_material symbol="{self.material.name}" target="#{self.material.sid}">""")
+        writefunc(indent + f"""          <bind_vertex_input semantic="UV0" input_semantic="TEXCOORD" input_set="0"/>""")
+        writefunc(indent + f"""        </instance_material>""")
+        writefunc(indent + f"""      </technique_common>""")
+        writefunc(indent + f"""    </bind_material>""")
+        writefunc(indent + f"""  </instance_geometry>""")
         writefunc(indent + f"""</node>""")
 
 class ColladaDocument:
