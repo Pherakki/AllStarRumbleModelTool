@@ -309,12 +309,11 @@ class ColladaSkinnedGeometryNode:
         
         
 class ColladaUnskinnedGeometryNode:
-    def __init__(self, sid, name, geometry, material, armature_node):
+    def __init__(self, sid, name, geometry, material):
         self.sid = sid
         self.name = name
         self.geometry = geometry
         self.material = material
-        self.armature = armature_node
     
     def write(self, writefunc, indent):
         writefunc(indent + f"""<node id="{self.sid}" name="{self.name}" type="NODE">""")
