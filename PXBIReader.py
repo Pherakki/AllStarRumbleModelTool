@@ -8,6 +8,7 @@ class PXBIReadWriter(BaseRW):
         self.mesh_pointers = None
         self.meshes = None
         self.materials = None
+        self.bone_data = []
         self.joint_names = []
         self.texture_names = []
         self.texture_binary = []
