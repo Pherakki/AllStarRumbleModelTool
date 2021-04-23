@@ -367,8 +367,11 @@ class MaterialReadWrite(BaseRW):
         
 texture_roles = {0: 'diffuse',
                  1: 'bumpmap',
+                 2: 'specular', # ???
+                 3: 'specular', # ???
                  4: 'specular',
-                 5: 'reflective'}
+                 5: 'reflective',
+                 6: 'specular'} # ???
         
 class TextureReadWrite(BaseRW):
     def __init__(self, bytestream):
