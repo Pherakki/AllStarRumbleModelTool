@@ -127,24 +127,39 @@ def PXBItoCollada(file, output_directory):
     
     geom_nodes = []
     for i, mesh in enumerate(pi.meshes):
-        vert_src = ColladaFloatSource(f"{mesh.name}-{i}-Position", [vert['Position'] for vert in mesh.vertices], ('X', 'Y', 'Z'))
-        normal_src = ColladaFloatSource(f"{mesh.name}-{i}-Normal", [vert['Normal'] for vert in mesh.vertices], ('X', 'Y', 'Z'))
-        uv_src = ColladaFloatSource(f"{mesh.name}-{i}-UV", [vert['UV'] for vert in mesh.vertices], ('S', 'T'))
-        tangent_src = ColladaFloatSource(f"{mesh.name}-{i}-Tangent", [vert['Tangent'] for vert in mesh.vertices], ('X', 'Y', 'Z'))
-        binormal_src = ColladaFloatSource(f"{mesh.name}-{i}-Binormal", [vert['Binormal'] for vert in mesh.vertices], ('X', 'Y', 'Z'))
-        
         input_list = ColladaInputList()
-        input_list.add_input(0, 'VERTEX', vert_src)
-        input_list.add_input(1, 'NORMAL', normal_src)
-        input_list.add_input(2, 'TEXCOORD', uv_src, set=0)
-        input_list.add_input(3, 'TANGENT', tangent_src)
-        input_list.add_input(4, 'BINORMAL', binormal_src)
+        sources = []
+        if 'Position' in mesh.vertices[0]:
+            vert_src = ColladaFloatSource(f"{mesh.name}-{i}-Position", [vert['Position'] for vert in mesh.vertices], ('X', 'Y', 'Z'))  
+            input_list.add_input(len(input_list.inputs), 'VERTEX', vert_src)
+            sources.append(vert_src)
+        if 'Normal' in mesh.vertices[0]:
+            normal_src = ColladaFloatSource(f"{mesh.name}-{i}-Normal", [vert['Normal'] for vert in mesh.vertices], ('X', 'Y', 'Z'))
+            input_list.add_input(len(input_list.inputs), 'NORMAL', normal_src)
+            sources.append(normal_src)
+        if 'UV' in mesh.vertices[0]:
+            uv_src = ColladaFloatSource(f"{mesh.name}-{i}-UV", [vert['UV'] for vert in mesh.vertices], ('S', 'T'))
+            input_list.add_input(len(input_list.inputs), 'TEXCOORD', uv_src)
+            sources.append(uv_src)
+        if 'Tangent' in mesh.vertices[0]:
+            tangent_src = ColladaFloatSource(f"{mesh.name}-{i}-Tangent", [vert['Tangent'] for vert in mesh.vertices], ('X', 'Y', 'Z'))
+            input_list.add_input(len(input_list.inputs), 'TANGENT', tangent_src)
+            sources.append(tangent_src)
+        if 'Binormal' in mesh.vertices[0]:
+            binormal_src = ColladaFloatSource(f"{mesh.name}-{i}-Binormal", [vert['Binormal'] for vert in mesh.vertices], ('X', 'Y', 'Z'))   
+            input_list.add_input(len(input_list.inputs), 'BINORMAL', binormal_src)
+            sources.append(binormal_src)
+        if 'Color' in mesh.vertices[0]:
+            color_src = ColladaFloatSource(f"{mesh.name}-{i}-Color", [vert['Color'] for vert in mesh.vertices], ('X', 'Y', 'Z'))   
+            input_list.add_input(len(input_list.inputs), 'COLOR', color_src)
+            sources.append(color_src)
+        
         
         mat = materials[mesh.material_index]
-        indices = flatten_list([(item, item, item, item, item) for item in flatten_list(mesh.triangles)])
+        indices = flatten_list([[item for _ in input_list.inputs] for item in flatten_list(mesh.triangles)])
         triangle_set = ColladaTriangleSet(indices, input_list, mat)
-        
-        geom = ColladaGeometry(f"{mesh.name}-{i}" + "-ID", f"{mesh.name}-{i}" + "-mesh", [vert_src, normal_src, uv_src, tangent_src, binormal_src], triangle_set)
+
+        geom = ColladaGeometry(f"{mesh.name}-{i}" + "-ID", f"{mesh.name}-{i}" + "-mesh", sources, triangle_set)
         model.geometries.append(geom)
         
         
