@@ -32,7 +32,7 @@ PXBItoCollada.exe <folder>
 - Vertex tangents and binormals may be the wrong way around, needs confirmation.
 
 ## Acknowledgements
-Thanks to [WarGrey-Sama](https://www.deviantart.com/wargrey-sama) for requesting that these tools be built, assistance with the texture format, as well as sharing tools and expertise. Exports with fixes to models and textures that export with issues are available on his [DeviantArt profile](https://www.deviantart.com/wargrey-sama).
+Thanks to [alicebitland](https://www.deviantart.com/alicebitland) and [WarGrey-Sama](https://www.deviantart.com/wargrey-sama) for requesting that these tools be built, assistance with the texture format, as well as sharing tools and expertise. Exports with fixes to models and textures that export with issues are available on WarGrey-Sama's [DeviantArt profile](https://www.deviantart.com/wargrey-sama).
 
 Thanks to [SydMontague](https://github.com/SydMontague) for help fixing vertex weight issues in the COLLADA exporter!
 
