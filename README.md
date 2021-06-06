@@ -25,7 +25,7 @@ PXBItoCollada.exe <folder>
 ```
 
 ## Known Issues
-- Currently only inteded for use with Digimon model files (chrXXX_<name>.bin)
+- Currently only inteded for use with Digimon model files (chrXXX_[name].bin)
 - Uncompressed textures do not export well. The tool also exports the raw GTF files, such that alternative GTF conversion tools can be used to convert these files.
 - Some textures have bad alpha-channel data that must be manually fixed in an external program.
 - The skeletons _may_ not be exactly correct.
